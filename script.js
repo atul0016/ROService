@@ -255,57 +255,9 @@ waInlineButtons.forEach((button, index) => {
 });
 
 if (bookingForm) {
-  let pendingSubmit = false;
-  let timeoutHandle = null;
-
   const submitButton = bookingForm.querySelector('button[type="submit"]');
-  const frameName = "formsubmit-hidden-frame";
-  let hiddenFrame = document.querySelector(`iframe[name="${frameName}"]`);
-
-  if (!hiddenFrame) {
-    hiddenFrame = document.createElement("iframe");
-    hiddenFrame.name = frameName;
-    hiddenFrame.style.display = "none";
-    document.body.appendChild(hiddenFrame);
-  }
-
-  bookingForm.setAttribute("target", frameName);
-
-  hiddenFrame.addEventListener("load", () => {
-    if (!pendingSubmit) {
-      return;
-    }
-
-    pendingSubmit = false;
-    clearTimeout(timeoutHandle);
-
-    if (formStatus) {
-      formStatus.classList.remove("err");
-      formStatus.classList.add("ok");
-      formStatus.textContent =
-        "Enquiry submitted. Please check inbox/spam in a few moments.";
-    }
-
-    bookingForm.reset();
-    if (selectedServiceInput) {
-      selectedServiceInput.value = "General enquiry";
-    }
-    if (recommendedPlan && peopleCount) {
-      peopleCount.value = "40";
-      recommendedPlan.textContent = "50 LPH RO";
-    }
-
-    if (submitButton) {
-      submitButton.disabled = false;
-      submitButton.textContent =
-        currentLang === "hi" ? "ईमेल पूछताछ भेजें" : "Send Email Enquiry";
-    }
-
-    refreshGlobalWaLinks();
-  });
-
-  bookingForm.addEventListener("submit", () => {
-    pendingSubmit = true;
+  bookingForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
 
     if (formStatus) {
       formStatus.classList.remove("ok", "err");
@@ -317,26 +269,50 @@ if (bookingForm) {
       submitButton.textContent = "Sending...";
     }
 
-    clearTimeout(timeoutHandle);
-    timeoutHandle = setTimeout(() => {
-      if (!pendingSubmit) {
-        return;
-      }
-      pendingSubmit = false;
+    try {
+      const formData = new FormData(bookingForm);
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 12000);
 
+      await fetch("https://formsubmit.co/smartroservicecenter@gmail.com", {
+        method: "POST",
+        mode: "no-cors",
+        body: formData,
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeout);
+
+      if (formStatus) {
+        formStatus.classList.remove("err");
+        formStatus.classList.add("ok");
+        formStatus.textContent =
+          "Enquiry submitted. Please check inbox/spam in a few moments.";
+      }
+
+      bookingForm.reset();
+      if (selectedServiceInput) {
+        selectedServiceInput.value = "General enquiry";
+      }
+      if (recommendedPlan && peopleCount) {
+        peopleCount.value = "40";
+        recommendedPlan.textContent = "50 LPH RO";
+      }
+      refreshGlobalWaLinks();
+    } catch (error) {
       if (formStatus) {
         formStatus.classList.remove("ok");
         formStatus.classList.add("err");
         formStatus.textContent =
           "Network is slow or blocked. Try again or use WhatsApp booking.";
       }
-
+    } finally {
       if (submitButton) {
         submitButton.disabled = false;
         submitButton.textContent =
           currentLang === "hi" ? "ईमेल पूछताछ भेजें" : "Send Email Enquiry";
       }
-    }, 12000);
+    }
   });
 }
 
