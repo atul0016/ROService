@@ -392,6 +392,78 @@ a {
   margin-top: 74px;
 }
 
+.media-showcase,
+.brochure-previews {
+  margin-top: 74px;
+}
+
+.media-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.media-card {
+  margin: 0;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 20px rgba(19, 48, 66, 0.06);
+}
+
+.media-card img {
+  width: 100%;
+  aspect-ratio: 1/1;
+  object-fit: cover;
+  display: block;
+}
+
+.media-card figcaption {
+  padding: 12px;
+  font-weight: 700;
+  color: var(--ink-alt);
+}
+
+.brochure-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.brochure-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+.brochure-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.brochure-head h3 {
+  font-size: 1.08rem;
+}
+
+.pdf-preview-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.pdf-preview-grid canvas {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #f2f6f9;
+}
+
 .trust-grid {
   margin-top: 18px;
   display: grid;
@@ -796,8 +868,13 @@ section {
   .trust-grid,
   .booking-shell,
   .testimonial-track,
-  .contact-grid {
+  .contact-grid,
+  .brochure-grid {
     grid-template-columns: 1fr;
+  }
+
+  .media-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .sticky-bar {
@@ -825,6 +902,11 @@ section {
 
   .hero {
     margin-top: 26px;
+  }
+
+  .media-grid,
+  .pdf-preview-grid {
+    grid-template-columns: 1fr;
   }
 }
 

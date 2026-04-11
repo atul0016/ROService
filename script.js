@@ -334,3 +334,61 @@ if (peopleCount && recommendedPlan) {
 
 refreshGlobalWaLinks();
 applyLanguage(currentLang);
+
+const renderPdfPreview = async (container) => {
+  const pdfFile = container.getAttribute("data-pdf");
+  const pagesText = container.getAttribute("data-pages") || "1";
+  const pages = pagesText
+    .split(",")
+    .map((v) => Number.parseInt(v.trim(), 10))
+    .filter((n) => Number.isFinite(n) && n > 0);
+
+  if (!pdfFile || !window.pdfjsLib) {
+    return;
+  }
+
+  try {
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+    const loadingTask = window.pdfjsLib.getDocument(encodeURI(pdfFile));
+    const pdf = await loadingTask.promise;
+
+    for (const pageNo of pages) {
+      const canvas = container.querySelector(`canvas[data-page="${pageNo}"]`);
+      if (!canvas || pageNo > pdf.numPages) {
+        continue;
+      }
+
+      const page = await pdf.getPage(pageNo);
+      const viewport = page.getViewport({ scale: 1 });
+      const targetWidth = Math.min(420, Math.floor(container.clientWidth / 2));
+      const scale = targetWidth / viewport.width;
+      const scaled = page.getViewport({ scale });
+
+      const context = canvas.getContext("2d");
+      canvas.width = Math.floor(scaled.width);
+      canvas.height = Math.floor(scaled.height);
+
+      await page.render({
+        canvasContext: context,
+        viewport: scaled,
+      }).promise;
+    }
+  } catch (error) {
+    container.querySelectorAll("canvas").forEach((canvas) => {
+      const context = canvas.getContext("2d");
+      canvas.width = 360;
+      canvas.height = 260;
+      context.fillStyle = "#eef3f7";
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      context.fillStyle = "#4e6070";
+      context.font = "600 16px Manrope, sans-serif";
+      context.fillText("Preview unavailable", 90, 130);
+    });
+  }
+};
+
+document.querySelectorAll(".pdf-preview-grid").forEach((grid) => {
+  renderPdfPreview(grid);
+});
