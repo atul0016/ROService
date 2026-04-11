@@ -255,69 +255,88 @@ waInlineButtons.forEach((button, index) => {
 });
 
 if (bookingForm) {
-  bookingForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
+  let pendingSubmit = false;
+  let timeoutHandle = null;
 
-    const submitButton = bookingForm.querySelector('button[type="submit"]');
-    if (submitButton) {
-      submitButton.disabled = true;
-      submitButton.textContent = "Sending...";
+  const submitButton = bookingForm.querySelector('button[type="submit"]');
+  const frameName = "formsubmit-hidden-frame";
+  let hiddenFrame = document.querySelector(`iframe[name="${frameName}"]`);
+
+  if (!hiddenFrame) {
+    hiddenFrame = document.createElement("iframe");
+    hiddenFrame.name = frameName;
+    hiddenFrame.style.display = "none";
+    document.body.appendChild(hiddenFrame);
+  }
+
+  bookingForm.setAttribute("target", frameName);
+
+  hiddenFrame.addEventListener("load", () => {
+    if (!pendingSubmit) {
+      return;
     }
+
+    pendingSubmit = false;
+    clearTimeout(timeoutHandle);
+
+    if (formStatus) {
+      formStatus.classList.remove("err");
+      formStatus.classList.add("ok");
+      formStatus.textContent =
+        "Enquiry submitted. Please check inbox/spam in a few moments.";
+    }
+
+    bookingForm.reset();
+    if (selectedServiceInput) {
+      selectedServiceInput.value = "General enquiry";
+    }
+    if (recommendedPlan && peopleCount) {
+      peopleCount.value = "40";
+      recommendedPlan.textContent = "50 LPH RO";
+    }
+
+    if (submitButton) {
+      submitButton.disabled = false;
+      submitButton.textContent =
+        currentLang === "hi" ? "ईमेल पूछताछ भेजें" : "Send Email Enquiry";
+    }
+
+    refreshGlobalWaLinks();
+  });
+
+  bookingForm.addEventListener("submit", () => {
+    pendingSubmit = true;
 
     if (formStatus) {
       formStatus.classList.remove("ok", "err");
       formStatus.textContent = "Sending your enquiry...";
     }
 
-    try {
-      const formData = new FormData(bookingForm);
-      const response = await fetch(
-        "https://formsubmit.co/ajax/smartroservicecenter@gmail.com",
-        {
-          method: "POST",
-          headers: {
-            Accept: "application/json",
-          },
-          body: formData,
-        }
-      );
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = "Sending...";
+    }
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
+    clearTimeout(timeoutHandle);
+    timeoutHandle = setTimeout(() => {
+      if (!pendingSubmit) {
+        return;
       }
+      pendingSubmit = false;
 
-      const result = await response.json();
-      if (result.success === "true" || result.success === true) {
-        if (formStatus) {
-          formStatus.classList.add("ok");
-          formStatus.textContent =
-            "Enquiry sent successfully. Please check your inbox/spam for confirmation.";
-        }
-        bookingForm.reset();
-        if (selectedServiceInput) {
-          selectedServiceInput.value = "General enquiry";
-        }
-        if (recommendedPlan && peopleCount) {
-          peopleCount.value = "40";
-          recommendedPlan.textContent = "50 LPH RO";
-        }
-        refreshGlobalWaLinks();
-      } else {
-        throw new Error("Submission failed");
-      }
-    } catch (error) {
       if (formStatus) {
+        formStatus.classList.remove("ok");
         formStatus.classList.add("err");
         formStatus.textContent =
-          "Could not send right now. Please try again or use WhatsApp booking.";
+          "Network is slow or blocked. Try again or use WhatsApp booking.";
       }
-    } finally {
+
       if (submitButton) {
         submitButton.disabled = false;
         submitButton.textContent =
           currentLang === "hi" ? "ईमेल पूछताछ भेजें" : "Send Email Enquiry";
       }
-    }
+    }, 12000);
   });
 }
 

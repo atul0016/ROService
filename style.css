@@ -503,6 +503,13 @@ a {
   font-weight: 700;
 }
 
+.form-status small {
+  display: block;
+  margin-top: 6px;
+  color: var(--muted);
+  font-weight: 500;
+}
+
 .quick-estimator {
   margin-top: 14px;
   background: #f2faf9;
