@@ -307,12 +307,23 @@ a {
   flex-wrap: wrap;
 }
 
-.brand-list span {
+.brand-list a {
   background: #fff;
   border: 1px solid var(--line);
   padding: 10px 14px;
   border-radius: 999px;
   font-weight: 600;
+  transition: transform 150ms ease, border-color 150ms ease, background 150ms ease;
+}
+
+.brand-list a:hover {
+  transform: translateY(-1px);
+  border-color: #8cbfcf;
+}
+
+.brand-list a:focus-visible {
+  outline: 2px solid #2aa09d;
+  outline-offset: 2px;
 }
 
 .section-head {
@@ -373,6 +384,11 @@ a {
   border-radius: 16px;
   padding: 14px;
   box-shadow: 0 8px 20px rgba(19, 48, 66, 0.06);
+}
+
+.product-tile.brand-match {
+  border-color: #57a7b4;
+  box-shadow: 0 0 0 3px rgba(49, 149, 165, 0.18), 0 8px 20px rgba(19, 48, 66, 0.06);
 }
 
 .product-tile img {

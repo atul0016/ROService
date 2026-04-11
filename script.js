@@ -254,6 +254,39 @@ waInlineButtons.forEach((button, index) => {
   });
 });
 
+const brandJumpLinks = document.querySelectorAll(".brand-jump");
+const productTiles = document.querySelectorAll(".product-tile[data-brand]");
+
+const clearBrandMatch = () => {
+  productTiles.forEach((tile) => tile.classList.remove("brand-match"));
+};
+
+brandJumpLinks.forEach((link) => {
+  link.addEventListener("click", (event) => {
+    event.preventDefault();
+
+    const href = link.getAttribute("href");
+    const brand = link.getAttribute("data-brand");
+    const target = href ? document.querySelector(href) : null;
+
+    clearBrandMatch();
+
+    const matched = Array.from(productTiles).filter(
+      (tile) => tile.getAttribute("data-brand") === brand
+    );
+
+    if (matched.length) {
+      matched.forEach((tile) => tile.classList.add("brand-match"));
+      matched[0].scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
+
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  });
+});
+
 if (bookingForm) {
   const submitButton = bookingForm.querySelector('button[type="submit"]');
   const accessKeyInput = bookingForm.querySelector('input[name="access_key"]');
