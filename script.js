@@ -192,6 +192,7 @@ const bookingForm = document.getElementById("bookingForm");
 const waInlineButtons = document.querySelectorAll(".wa-book");
 const peopleCount = document.getElementById("peopleCount");
 const recommendedPlan = document.getElementById("recommendedPlan");
+const formStatus = document.getElementById("formStatus");
 
 const defaultMessage =
   "Hello Smart RO Service Center. I want to book a service.";
@@ -254,11 +255,70 @@ waInlineButtons.forEach((button, index) => {
 });
 
 if (bookingForm) {
-  const currentUrl = `${window.location.origin}${window.location.pathname}?submitted=1`;
-  const nextInput = bookingForm.querySelector('input[name="_next"]');
-  if (nextInput) {
-    nextInput.value = currentUrl;
-  }
+  bookingForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+
+    const submitButton = bookingForm.querySelector('button[type="submit"]');
+    if (submitButton) {
+      submitButton.disabled = true;
+      submitButton.textContent = "Sending...";
+    }
+
+    if (formStatus) {
+      formStatus.classList.remove("ok", "err");
+      formStatus.textContent = "Sending your enquiry...";
+    }
+
+    try {
+      const formData = new FormData(bookingForm);
+      const response = await fetch(
+        "https://formsubmit.co/ajax/smartroservicecenter@gmail.com",
+        {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+          },
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      const result = await response.json();
+      if (result.success === "true" || result.success === true) {
+        if (formStatus) {
+          formStatus.classList.add("ok");
+          formStatus.textContent =
+            "Enquiry sent successfully. Please check your inbox/spam for confirmation.";
+        }
+        bookingForm.reset();
+        if (selectedServiceInput) {
+          selectedServiceInput.value = "General enquiry";
+        }
+        if (recommendedPlan && peopleCount) {
+          peopleCount.value = "40";
+          recommendedPlan.textContent = "50 LPH RO";
+        }
+        refreshGlobalWaLinks();
+      } else {
+        throw new Error("Submission failed");
+      }
+    } catch (error) {
+      if (formStatus) {
+        formStatus.classList.add("err");
+        formStatus.textContent =
+          "Could not send right now. Please try again or use WhatsApp booking.";
+      }
+    } finally {
+      if (submitButton) {
+        submitButton.disabled = false;
+        submitButton.textContent =
+          currentLang === "hi" ? "ईमेल पूछताछ भेजें" : "Send Email Enquiry";
+      }
+    }
+  });
 }
 
 if (peopleCount && recommendedPlan) {
@@ -275,16 +335,6 @@ if (peopleCount && recommendedPlan) {
 
   peopleCount.addEventListener("input", updatePlan);
   updatePlan();
-}
-
-if (window.location.search.includes("submitted=1")) {
-  const successTag = document.createElement("p");
-  successTag.textContent = "Thank you. Your enquiry was sent successfully.";
-  successTag.style.color = "#0f605c";
-  successTag.style.fontWeight = "700";
-  if (bookingForm) {
-    bookingForm.prepend(successTag);
-  }
 }
 
 refreshGlobalWaLinks();

@@ -168,7 +168,7 @@
           <input type="hidden" name="_subject" value="New Booking Enquiry - Smart RO Service Center" />
           <input type="hidden" name="_captcha" value="false" />
           <input type="hidden" name="_template" value="table" />
-          <input type="hidden" name="_next" value="https://example.com/?submitted=1" />
+          <input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off" />
           <input type="hidden" id="selectedService" name="selected_service" value="General enquiry" />
 
           <label for="name">Full Name</label>
@@ -199,6 +199,8 @@
             <input id="peopleCount" type="range" min="5" max="500" value="40" />
             <p><span data-i18n="recommended">Recommended:</span> <strong id="recommendedPlan">50 LPH RO</strong></p>
           </div>
+
+          <p id="formStatus" class="form-status" role="status" aria-live="polite"></p>
 
           <button class="btn" type="submit" data-i18n="sendEmail">Send Email Enquiry</button>
           <a class="btn btn-outline" id="waFromForm" href="#">Book on WhatsApp</a>

@@ -481,6 +481,28 @@ a {
   margin-top: 8px;
 }
 
+.booking-form .btn:disabled {
+  opacity: 0.72;
+  cursor: not-allowed;
+}
+
+.form-status {
+  margin: 10px 0 0;
+  min-height: 1.2em;
+  font-size: 0.92rem;
+  color: var(--muted);
+}
+
+.form-status.ok {
+  color: #0f6c5f;
+  font-weight: 700;
+}
+
+.form-status.err {
+  color: #a33939;
+  font-weight: 700;
+}
+
 .quick-estimator {
   margin-top: 14px;
   background: #f2faf9;
