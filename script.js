@@ -256,6 +256,7 @@ waInlineButtons.forEach((button, index) => {
 
 if (bookingForm) {
   const submitButton = bookingForm.querySelector('button[type="submit"]');
+  const accessKeyInput = bookingForm.querySelector('input[name="access_key"]');
   bookingForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
@@ -271,23 +272,44 @@ if (bookingForm) {
 
     try {
       const formData = new FormData(bookingForm);
+      const accessKey =
+        accessKeyInput?.value?.trim() || formData.get("access_key")?.toString().trim() || "";
+
+      if (!accessKey) {
+        throw new Error("WEB3FORMS_ACCESS_KEY_MISSING");
+      }
+
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 12000);
 
-      await fetch("https://formsubmit.co/smartroservicecenter@gmail.com", {
+      const response = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
-        mode: "no-cors",
         body: formData,
         signal: controller.signal,
+        headers: {
+          Accept: "application/json",
+        },
       });
 
       clearTimeout(timeout);
 
+      if (!response.ok) {
+        throw new Error("WEB3FORMS_HTTP_ERROR");
+      }
+
+      const result = await response.json();
+      if (!result.success) {
+        throw new Error(result.message || "WEB3FORMS_SUBMIT_FAILED");
+      }
+
       if (formStatus) {
+        const submittedName =
+          (formData.get("name")?.toString().trim() || "").split(" ")[0];
         formStatus.classList.remove("err");
         formStatus.classList.add("ok");
-        formStatus.textContent =
-          "Enquiry submitted. Please check inbox/spam in a few moments.";
+        formStatus.textContent = submittedName
+          ? `Form submitted. Thanks for your enquiry, ${submittedName}.`
+          : "Form submitted. Thanks for your enquiry.";
       }
 
       bookingForm.reset();
@@ -303,8 +325,13 @@ if (bookingForm) {
       if (formStatus) {
         formStatus.classList.remove("ok");
         formStatus.classList.add("err");
-        formStatus.textContent =
-          "Network is slow or blocked. Try again or use WhatsApp booking.";
+        if (error instanceof Error && error.message === "WEB3FORMS_ACCESS_KEY_MISSING") {
+          formStatus.textContent =
+            "Web3Forms access key is missing. Add it in the form and try again.";
+        } else {
+          formStatus.textContent =
+            "Submission failed. Please try again or use WhatsApp booking.";
+        }
       }
     } finally {
       if (submitButton) {
@@ -335,14 +362,153 @@ if (peopleCount && recommendedPlan) {
 refreshGlobalWaLinks();
 applyLanguage(currentLang);
 
-const renderPdfPreview = async (container) => {
-  const pdfFile = container.getAttribute("data-pdf");
-  const pagesText = container.getAttribute("data-pages") || "1";
-  const pages = pagesText
-    .split(",")
-    .map((v) => Number.parseInt(v.trim(), 10))
-    .filter((n) => Number.isFinite(n) && n > 0);
+const modelData = {
+  kent: {
+    title: "Kent Elegant",
+    desc: "Reliable domestic RO unit with clean design and easy service support.",
+    image: "KENT ELEGANT.jpg",
+    tags: ["RO", "Domestic", "Elegant Design"],
+  },
+  "aquaguard-black": {
+    title: "Aquaguard Black Edition",
+    desc: "Premium black body model with long filter life claim and compact profile.",
+    image: "WhatsApp Image 2026-04-11 at 22.19.22.jpeg",
+    tags: ["Aquaguard", "2-Year Filter", "Compact"],
+  },
+  "aquaguard-kitchen": {
+    title: "Kitchen Placement View",
+    desc: "Lifestyle setup preview that helps users visualize in-kitchen installation.",
+    image: "WhatsApp Image 2026-04-11 at 22.19.22 (1).jpeg",
+    tags: ["Lifestyle", "Kitchen Fit", "Space Saving"],
+  },
+  "filter-life": {
+    title: "2 Year Filter Life Campaign",
+    desc: "Marketing visual highlighting durability and long-term filtration confidence.",
+    image: "WhatsApp Image 2026-04-11 at 22.19.22 (2).jpeg",
+    tags: ["Durability", "Campaign", "Filter Life"],
+  },
+  stages: {
+    title: "7 Stage Purification",
+    desc: "Infographic-style visual explaining multi-stage purification components.",
+    image: "WhatsApp Image 2026-04-11 at 22.19.22 (3).jpeg",
+    tags: ["7 Stage", "Protection", "Filtration"],
+  },
+};
 
+const modelTabs = document.querySelectorAll(".model-tab");
+const modelStageImage = document.getElementById("modelStageImage");
+const modelStageTitle = document.getElementById("modelStageTitle");
+const modelStageDesc = document.getElementById("modelStageDesc");
+const modelStageTags = document.getElementById("modelStageTags");
+
+const updateModelStage = (key) => {
+  const model = modelData[key];
+  if (!model || !modelStageImage || !modelStageTitle || !modelStageDesc || !modelStageTags) {
+    return;
+  }
+
+  modelStageImage.src = model.image;
+  modelStageImage.alt = model.title;
+  modelStageImage.setAttribute("data-lightbox-src", model.image);
+  modelStageTitle.textContent = model.title;
+  modelStageDesc.textContent = model.desc;
+  modelStageTags.innerHTML = model.tags.map((tag) => `<span>${tag}</span>`).join("");
+};
+
+modelTabs.forEach((tab) => {
+  tab.addEventListener("click", () => {
+    modelTabs.forEach((node) => node.classList.remove("active"));
+    tab.classList.add("active");
+    updateModelStage(tab.getAttribute("data-model"));
+  });
+});
+
+const lightbox = document.getElementById("imageLightbox");
+const lightboxImage = document.getElementById("lightboxImage");
+const lightboxClose = document.getElementById("lightboxClose");
+
+const openLightbox = (src, alt) => {
+  if (!lightbox || !lightboxImage) {
+    return;
+  }
+  lightboxImage.src = src;
+  lightboxImage.alt = alt || "Preview";
+  lightbox.classList.add("open");
+  lightbox.setAttribute("aria-hidden", "false");
+};
+
+const closeLightbox = () => {
+  if (!lightbox || !lightboxImage) {
+    return;
+  }
+  lightbox.classList.remove("open");
+  lightbox.setAttribute("aria-hidden", "true");
+  lightboxImage.src = "";
+};
+
+document.querySelectorAll("[data-lightbox-src]").forEach((node) => {
+  node.addEventListener("click", () => {
+    openLightbox(node.getAttribute("data-lightbox-src"), node.getAttribute("alt"));
+  });
+});
+
+if (lightboxClose) {
+  lightboxClose.addEventListener("click", closeLightbox);
+}
+
+if (lightbox) {
+  lightbox.addEventListener("click", (event) => {
+    if (event.target === lightbox) {
+      closeLightbox();
+    }
+  });
+}
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    closeLightbox();
+  }
+});
+
+const drawPreviewFallback = (container) => {
+  container.querySelectorAll("canvas").forEach((canvas) => {
+    const context = canvas.getContext("2d");
+    canvas.width = 360;
+    canvas.height = 260;
+    context.fillStyle = "#eef3f7";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = "#4e6070";
+    context.font = "600 16px Manrope, sans-serif";
+    context.fillText("Preview unavailable", 90, 130);
+  });
+};
+
+const renderPdfPages = async (pdf, container, pageA) => {
+  const requested = [pageA, Math.min(pdf.numPages, pageA + 1)];
+
+  for (let i = 0; i < requested.length; i += 1) {
+    const pageNo = requested[i];
+    const canvas = container.querySelector(`canvas[data-page="${i + 1}"]`);
+    if (!canvas || pageNo < 1 || pageNo > pdf.numPages) {
+      continue;
+    }
+
+    const page = await pdf.getPage(pageNo);
+    const viewport = page.getViewport({ scale: 1 });
+    const targetWidth = Math.min(420, Math.floor(container.clientWidth / 2));
+    const scale = targetWidth / viewport.width;
+    const scaled = page.getViewport({ scale });
+
+    const context = canvas.getContext("2d");
+    canvas.width = Math.floor(scaled.width);
+    canvas.height = Math.floor(scaled.height);
+
+    await page.render({ canvasContext: context, viewport: scaled }).promise;
+  }
+};
+
+const initPdfPreview = async (container) => {
+  const pdfFile = container.getAttribute("data-pdf");
   if (!pdfFile || !window.pdfjsLib) {
     return;
   }
@@ -354,41 +520,35 @@ const renderPdfPreview = async (container) => {
     const loadingTask = window.pdfjsLib.getDocument(encodeURI(pdfFile));
     const pdf = await loadingTask.promise;
 
-    for (const pageNo of pages) {
-      const canvas = container.querySelector(`canvas[data-page="${pageNo}"]`);
-      if (!canvas || pageNo > pdf.numPages) {
-        continue;
+    const card = container.closest(".brochure-card");
+    const select = card?.querySelector(".pdf-page-select");
+    const button = card?.querySelector(".pdf-render-btn");
+
+    if (select) {
+      select.innerHTML = "";
+      const maxPages = Math.min(pdf.numPages, 20);
+      for (let page = 1; page <= maxPages; page += 1) {
+        const option = document.createElement("option");
+        option.value = String(page);
+        option.textContent = `Page ${page}`;
+        select.appendChild(option);
       }
+    }
 
-      const page = await pdf.getPage(pageNo);
-      const viewport = page.getViewport({ scale: 1 });
-      const targetWidth = Math.min(420, Math.floor(container.clientWidth / 2));
-      const scale = targetWidth / viewport.width;
-      const scaled = page.getViewport({ scale });
+    const initial = Number.parseInt(container.getAttribute("data-pages")?.split(",")[0] || "1", 10);
+    await renderPdfPages(pdf, container, initial);
 
-      const context = canvas.getContext("2d");
-      canvas.width = Math.floor(scaled.width);
-      canvas.height = Math.floor(scaled.height);
-
-      await page.render({
-        canvasContext: context,
-        viewport: scaled,
-      }).promise;
+    if (button && select) {
+      button.addEventListener("click", async () => {
+        const page = Number.parseInt(select.value, 10) || 1;
+        await renderPdfPages(pdf, container, page);
+      });
     }
   } catch (error) {
-    container.querySelectorAll("canvas").forEach((canvas) => {
-      const context = canvas.getContext("2d");
-      canvas.width = 360;
-      canvas.height = 260;
-      context.fillStyle = "#eef3f7";
-      context.fillRect(0, 0, canvas.width, canvas.height);
-      context.fillStyle = "#4e6070";
-      context.font = "600 16px Manrope, sans-serif";
-      context.fillText("Preview unavailable", 90, 130);
-    });
+    drawPreviewFallback(container);
   }
 };
 
 document.querySelectorAll(".pdf-preview-grid").forEach((grid) => {
-  renderPdfPreview(grid);
+  initPdfPreview(grid);
 });
