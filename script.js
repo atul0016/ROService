@@ -289,7 +289,6 @@ brandJumpLinks.forEach((link) => {
 
 if (bookingForm) {
   const submitButton = bookingForm.querySelector('button[type="submit"]');
-  const accessKeyInput = bookingForm.querySelector('input[name="access_key"]');
   bookingForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
@@ -305,35 +304,18 @@ if (bookingForm) {
 
     try {
       const formData = new FormData(bookingForm);
-      const accessKey =
-        accessKeyInput?.value?.trim() || formData.get("access_key")?.toString().trim() || "";
-
-      if (!accessKey) {
-        throw new Error("WEB3FORMS_ACCESS_KEY_MISSING");
-      }
 
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 12000);
 
-      const response = await fetch("https://api.web3forms.com/submit", {
+      await fetch("https://formsubmit.co/smartroservicecenter@gmail.com", {
         method: "POST",
         body: formData,
+        mode: "no-cors",
         signal: controller.signal,
-        headers: {
-          Accept: "application/json",
-        },
       });
 
       clearTimeout(timeout);
-
-      if (!response.ok) {
-        throw new Error("WEB3FORMS_HTTP_ERROR");
-      }
-
-      const result = await response.json();
-      if (!result.success) {
-        throw new Error(result.message || "WEB3FORMS_SUBMIT_FAILED");
-      }
 
       if (formStatus) {
         const submittedName =
