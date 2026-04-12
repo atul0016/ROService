@@ -480,6 +480,17 @@ a {
   margin-top: 74px;
 }
 
+.brands {
+  text-align: center;
+  padding: 30px 20px;
+  border-radius: 28px;
+  border: 1px solid rgba(203, 222, 231, 0.9);
+  background:
+    radial-gradient(circle at 15% 0%, rgba(169, 217, 212, 0.24), transparent 40%),
+    radial-gradient(circle at 85% 100%, rgba(188, 212, 234, 0.2), transparent 38%),
+    rgba(244, 250, 252, 0.75);
+}
+
 .brands h2,
 .section-head h2,
 .amc h2,
@@ -492,20 +503,25 @@ a {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+  justify-content: center;
 }
 
 .brand-list a {
-  background: #fff;
-  border: 1px solid var(--line);
-  padding: 10px 14px;
+  background: linear-gradient(180deg, #ffffff 0%, #f2f7fb 100%);
+  border: 1px solid #c7d7e4;
+  padding: 11px 18px;
   border-radius: 999px;
-  font-weight: 600;
-  transition: transform 150ms ease, border-color 150ms ease, background 150ms ease;
+  font-weight: 700;
+  color: #1f3342;
+  box-shadow: 0 6px 14px rgba(20, 47, 66, 0.06);
+  transition: transform 150ms ease, border-color 150ms ease, background 150ms ease, box-shadow 150ms ease;
 }
 
 .brand-list a:hover {
-  transform: translateY(-1px);
-  border-color: #8cbfcf;
+  transform: translateY(-2px);
+  border-color: #6eb5bf;
+  background: linear-gradient(180deg, #ffffff 0%, #eaf8f7 100%);
+  box-shadow: 0 10px 22px rgba(23, 70, 91, 0.12);
 }
 
 .brand-list a:focus-visible {
