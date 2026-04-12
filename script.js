@@ -200,6 +200,7 @@ const defaultMessage =
 const buildMessageFromForm = () => {
   const name = (document.getElementById("name")?.value || "").trim();
   const phone = (document.getElementById("phone")?.value || "").trim();
+  const email = (document.getElementById("email")?.value || "").trim();
   const service = (serviceSelect?.value || "General enquiry").trim();
   const message = (document.getElementById("message")?.value || "").trim();
 
@@ -207,6 +208,7 @@ const buildMessageFromForm = () => {
     "Hello Smart RO Service Center, I want to book a service.",
     `Name: ${name || "Not provided"}`,
     `Phone: ${phone || "Not provided"}`,
+    `Email: ${email || "Not provided"}`,
     `Service: ${service || "General enquiry"}`,
     `Message: ${message || "N/A"}`,
   ].join("\n");
@@ -237,7 +239,7 @@ if (serviceSelect && selectedServiceInput) {
   });
 }
 
-["name", "phone", "service", "message"].forEach((id) => {
+["name", "phone", "email", "service", "message"].forEach((id) => {
   const node = document.getElementById(id);
   if (node) {
     node.addEventListener("input", refreshGlobalWaLinks);
@@ -289,6 +291,7 @@ brandJumpLinks.forEach((link) => {
 
 if (bookingForm) {
   const submitButton = bookingForm.querySelector('button[type="submit"]');
+  const accessKeyInput = bookingForm.querySelector('input[name="access_key"]');
   bookingForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
@@ -304,18 +307,35 @@ if (bookingForm) {
 
     try {
       const formData = new FormData(bookingForm);
+      const accessKey =
+        accessKeyInput?.value?.trim() || formData.get("access_key")?.toString().trim() || "";
+
+      if (!accessKey) {
+        throw new Error("WEB3FORMS_ACCESS_KEY_MISSING");
+      }
 
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 12000);
 
-      await fetch("https://formsubmit.co/smartroservicecenter@gmail.com", {
+      const response = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
         body: formData,
-        mode: "no-cors",
         signal: controller.signal,
+        headers: {
+          Accept: "application/json",
+        },
       });
 
       clearTimeout(timeout);
+
+      if (!response.ok) {
+        throw new Error("WEB3FORMS_HTTP_ERROR");
+      }
+
+      const result = await response.json();
+      if (!result.success) {
+        throw new Error(result.message || "WEB3FORMS_SUBMIT_FAILED");
+      }
 
       if (formStatus) {
         const submittedName =
@@ -340,8 +360,13 @@ if (bookingForm) {
       if (formStatus) {
         formStatus.classList.remove("ok");
         formStatus.classList.add("err");
-        formStatus.textContent =
-          "Submission failed. Please try again or use WhatsApp booking.";
+        if (error instanceof Error && error.message === "WEB3FORMS_ACCESS_KEY_MISSING") {
+          formStatus.textContent =
+            "Form key missing. Please contact support or use WhatsApp booking.";
+        } else {
+          formStatus.textContent =
+            "Submission failed. Please try again or use WhatsApp booking.";
+        }
       }
     } finally {
       if (submitButton) {

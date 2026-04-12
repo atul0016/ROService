@@ -185,9 +185,10 @@
         <form
           class="booking-form"
           id="bookingForm"
-          action="https://formsubmit.co/smartroservicecenter@gmail.com"
+          action="https://api.web3forms.com/submit"
           method="POST"
         >
+          <input type="hidden" name="access_key" value="bfd9108e-3746-4a2d-9280-c6152c2bfeef" />
           <input type="hidden" name="_subject" value="New Booking Enquiry - Smart RO Service Center" />
           <input type="hidden" name="_captcha" value="false" />
           <input type="hidden" name="_template" value="table" />
@@ -199,6 +200,9 @@
 
           <label for="phone">Phone Number</label>
           <input id="phone" name="phone" type="tel" placeholder="Enter phone number" required />
+
+          <label for="email">Email Address</label>
+          <input id="email" name="email" type="email" placeholder="Enter email address" required />
 
           <label for="service">Service Needed</label>
           <select id="service" name="service" required>
