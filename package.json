@@ -1,0 +1,26 @@
+{
+  "name": "smart-ro-plan-b",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -H 127.0.0.1 -p 3001",
+    "dev:3000": "next dev -H 127.0.0.1 -p 3000",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "appwrite:setup": "node --env-file=.env.local scripts/setup-appwrite.mjs"
+  },
+  "dependencies": {
+    "appwrite": "^16.1.0",
+    "next": "^16.2.4",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "eslint": "^9.39.1",
+    "eslint-config-next": "^16.2.4"
+  },
+  "overrides": {
+    "postcss": "^8.5.10"
+  }
+}

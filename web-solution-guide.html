@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web Dev Business — Complete Solution Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --border: #1e1e2e;
+    --text: #e8e8f0;
+    --muted: #6b6b80;
+    --plan-a: #ff6b35;
+    --plan-b: #00d4aa;
+    --accent: #7c6fff;
+    --yellow: #ffd166;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    line-height: 1.7;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* NOISE TEXTURE */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.4;
+  }
+
+  .container { max-width: 960px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+  /* HERO */
+  .hero {
+    padding: 80px 0 60px;
+    text-align: center;
+    position: relative;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: 300px;
+    background: radial-gradient(ellipse, rgba(124,111,255,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .badge {
+    display: inline-block;
+    border: 1px solid var(--border);
+    padding: 4px 14px;
+    border-radius: 100px;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+
+  .hero h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(32px, 6vw, 56px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 16px;
+  }
+
+  .hero h1 span { color: var(--accent); font-family: 'Instrument Serif', serif; font-style: italic; }
+
+  .hero p {
+    color: var(--muted);
+    font-size: 15px;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+
+  /* PLAN TOGGLE TABS */
+  .plan-tabs {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin: 48px 0 16px;
+    flex-wrap: wrap;
+  }
+
+  .tab-btn {
+    padding: 10px 28px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.05em;
+  }
+
+  .tab-btn.active-a { border-color: var(--plan-a); color: var(--plan-a); background: rgba(255,107,53,0.07); }
+  .tab-btn.active-b { border-color: var(--plan-b); color: var(--plan-b); background: rgba(0,212,170,0.07); }
+
+  /* PLAN SECTIONS */
+  .plan { display: none; }
+  .plan.active { display: block; animation: fadeUp 0.4s ease; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* PLAN HEADER */
+  .plan-header {
+    border-radius: 16px;
+    padding: 40px;
+    margin-bottom: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .plan-a .plan-header { background: linear-gradient(135deg, rgba(255,107,53,0.12), rgba(255,107,53,0.03)); border: 1px solid rgba(255,107,53,0.2); }
+  .plan-b .plan-header { background: linear-gradient(135deg, rgba(0,212,170,0.12), rgba(0,212,170,0.03)); border: 1px solid rgba(0,212,170,0.2); }
+
+  .plan-label {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .plan-a .plan-label { color: var(--plan-a); }
+  .plan-b .plan-label { color: var(--plan-b); }
+
+  .plan-header h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 8px;
+  }
+
+  .plan-header p { color: var(--muted); font-size: 14px; max-width: 600px; }
+
+  .stack-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 20px;
+  }
+
+  .pill {
+    padding: 5px 14px;
+    border-radius: 100px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .plan-a .pill { background: rgba(255,107,53,0.1); color: var(--plan-a); border: 1px solid rgba(255,107,53,0.2); }
+  .plan-b .pill { background: rgba(0,212,170,0.1); color: var(--plan-b); border: 1px solid rgba(0,212,170,0.2); }
+
+  /* SECTIONS */
+  .section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 32px;
+    margin-bottom: 20px;
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title .num {
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+  }
+
+  .plan-a .num { background: rgba(255,107,53,0.15); color: var(--plan-a); }
+  .plan-b .num { background: rgba(0,212,170,0.15); color: var(--plan-b); }
+
+  /* TABLE */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th {
+    text-align: left;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0 0 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+
+  td:first-child { color: var(--muted); width: 30%; }
+  td:nth-child(2) { font-weight: 500; }
+
+  .cost {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    display: inline-block;
+  }
+
+  .cost-free { background: rgba(0,212,170,0.1); color: var(--plan-b); }
+  .cost-paid { background: rgba(255,209,102,0.1); color: var(--yellow); }
+  .cost-client { background: rgba(124,111,255,0.1); color: var(--accent); }
+
+  /* STEPS */
+  .steps { display: flex; flex-direction: column; gap: 0; }
+
+  .step {
+    display: flex;
+    gap: 20px;
+    position: relative;
+    padding-bottom: 24px;
+  }
+
+  .step:last-child { padding-bottom: 0; }
+
+  .step-line {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .step-dot {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+    font-family: 'Syne', sans-serif;
+  }
+
+  .plan-a .step-dot { background: rgba(255,107,53,0.15); color: var(--plan-a); border: 1px solid rgba(255,107,53,0.3); }
+  .plan-b .step-dot { background: rgba(0,212,170,0.15); color: var(--plan-b); border: 1px solid rgba(0,212,170,0.3); }
+
+  .step-connector {
+    width: 1px;
+    flex: 1;
+    margin-top: 4px;
+    background: var(--border);
+  }
+
+  .step:last-child .step-connector { display: none; }
+
+  .step-content { flex: 1; padding-top: 4px; }
+  .step-content h4 { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .step-content p { color: var(--muted); font-size: 13px; line-height: 1.6; }
+  .step-content code {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--yellow);
+  }
+
+  /* FLOW DIAGRAM */
+  .flow {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .flow-box {
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.03);
+  }
+
+  .flow-arrow { color: var(--muted); font-size: 16px; }
+
+  /* PRICING */
+  .price-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+  }
+
+  .price-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+  }
+
+  .price-card .pkg { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .price-card .amount { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+  .price-card .desc { font-size: 12px; color: var(--muted); }
+
+  .plan-a .price-card .amount { color: var(--plan-a); }
+  .plan-b .price-card .amount { color: var(--plan-b); }
+
+  /* PROS/CONS */
+  .pro-con {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  @media (max-width: 500px) { .pro-con { grid-template-columns: 1fr; } }
+
+  .pros, .cons {
+    border-radius: 8px;
+    padding: 16px;
+  }
+
+  .pros { background: rgba(0,212,170,0.04); border: 1px solid rgba(0,212,170,0.12); }
+  .cons { background: rgba(255,107,53,0.04); border: 1px solid rgba(255,107,53,0.12); }
+
+  .pros h5 { color: var(--plan-b); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px; }
+  .cons h5 { color: var(--plan-a); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px; }
+
+  .pros li, .cons li {
+    font-size: 13px;
+    color: var(--muted);
+    list-style: none;
+    padding: 4px 0;
+    padding-left: 16px;
+    position: relative;
+  }
+
+  .pros li::before { content: '✓'; position: absolute; left: 0; color: var(--plan-b); }
+  .cons li::before { content: '×'; position: absolute; left: 0; color: var(--plan-a); }
+
+  /* FINAL VERDICT */
+  .verdict {
+    border-radius: 16px;
+    padding: 40px;
+    margin: 40px 0 80px;
+    text-align: center;
+    background: linear-gradient(135deg, rgba(124,111,255,0.08), rgba(0,212,170,0.04));
+    border: 1px solid rgba(124,111,255,0.2);
+  }
+
+  .verdict h3 {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 12px;
+  }
+
+  .verdict p { color: var(--muted); font-size: 14px; max-width: 600px; margin: 0 auto 24px; }
+
+  .verdict-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  @media (max-width: 480px) { .verdict-grid { grid-template-columns: 1fr; } }
+
+  .verdict-card {
+    border-radius: 10px;
+    padding: 20px;
+    text-align: left;
+  }
+
+  .verdict-a { background: rgba(255,107,53,0.08); border: 1px solid rgba(255,107,53,0.2); }
+  .verdict-b { background: rgba(0,212,170,0.08); border: 1px solid rgba(0,212,170,0.2); }
+
+  .verdict-card .v-label { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 6px; }
+  .verdict-a .v-label { color: var(--plan-a); }
+  .verdict-b .v-label { color: var(--plan-b); }
+
+  .verdict-card h4 { font-family: 'Syne', sans-serif; font-size: 14px; margin-bottom: 6px; }
+  .verdict-card p { font-size: 12px; color: var(--muted); }
+
+  /* DIVIDER */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+  .highlight-box {
+    border-radius: 8px;
+    padding: 16px 20px;
+    font-size: 13px;
+    margin-top: 16px;
+  }
+
+  .plan-a .highlight-box { background: rgba(255,209,102,0.05); border: 1px solid rgba(255,209,102,0.15); color: var(--yellow); }
+  .plan-b .highlight-box { background: rgba(255,209,102,0.05); border: 1px solid rgba(255,209,102,0.15); color: var(--yellow); }
+
+  @media (max-width: 600px) {
+    .plan-header { padding: 24px; }
+    .section { padding: 20px; }
+    .hero { padding: 48px 0 32px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="badge">Solo Developer Playbook</div>
+    <h1>Your Complete<br><span>Client Website</span> Solution</h1>
+    <p>Two real plans, full breakdown — costs, steps, tech stack, and who each plan is best for.</p>
+  </div>
+
+  <!-- TABS -->
+  <div class="plan-tabs">
+    <button class="tab-btn active-a" onclick="showPlan('a')">🟠 Plan A — WordPress + Hostinger</button>
+    <button class="tab-btn" onclick="showPlan('b')">🟢 Plan B — Next.js + Appwrite + Vercel</button>
+  </div>
+
+  <!-- ===================== PLAN A ===================== -->
+  <div class="plan plan-a active" id="plan-a">
+
+    <div class="plan-header">
+      <div class="plan-label">Plan A — Traditional</div>
+      <h2>WordPress + Hostinger</h2>
+      <p>Best for clients who want to manage their own content without touching code. Fast to build, easy to hand over, industry standard.</p>
+      <div class="stack-pills">
+        <span class="pill">WordPress</span>
+        <span class="pill">Elementor Pro</span>
+        <span class="pill">Hostinger</span>
+        <span class="pill">Namecheap Domain</span>
+        <span class="pill">Zoho Mail</span>
+      </div>
+    </div>
+
+    <!-- STEP BY STEP -->
+    <div class="section">
+      <div class="section-title"><span class="num">01</span> Step-by-Step Setup</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-line"><div class="step-dot">1</div><div class="step-connector"></div></div>
+          <div class="step-content">
+            <h4>Buy Domain (Client Pays)</h4>
+            <p>Go to <code>namecheap.com</code> — search and buy their domain. Example: <code>riyaskitchen.com</code> for ~$10/year. Always let client own this in their own account.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-line"><div class="step-dot">2</div><div class="step-connector"></div></div>
+          <div class="step-content">
+            <h4>Buy Hosting on Hostinger (Client Pays)</h4>
+            <p>Go to <code>hostinger.com</code> → Business Plan (~₹5000/year). This gives WordPress auto-installer, free SSL, email hosting, daily backups.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-line"><div class="step-dot">3</div><div class="step-connector"></div></div>
+          <div class="step-content">
+            <h4>Connect Domain to Hostinger</h4>
+            <p>In Namecheap, change the Nameservers to Hostinger's nameservers. Takes 5 minutes, live in 1–24 hours.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-line"><div class="step-dot">4</div><div class="step-connector"></div></div>
+          <div class="step-content">
+            <h4>Install WordPress (1 click)</h4>
+            <p>In Hostinger dashboard → WordPress → Auto Installer. Done in 2 minutes. SSL activates automatically.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-line"><div class="step-dot">5</div><div class="step-connector"></div></div>
+          <div class="step-content">
+            <h4>Install Elementor + Your Theme</h4>
+            <p>Install <code>Elementor Pro</code> ($59/year). Pick a starter template. Customize everything — colors, fonts, sections — with drag and drop. No code needed.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-line"><div class="step-dot">6</div><div class="step-connector"></div></div>
+          <div class="step-content">
+            <h4>Build the Website</h4>
+            <p>Home, About, Services, Gallery, Contact pages. Add WhatsApp button, Google Maps, contact form (WPForms). Setup SEO with Rank Math plugin.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-line"><div class="step-dot">7</div><div class="step-connector"></div></div>
+          <div class="step-content">
+            <h4>Setup Business Email</h4>
+            <p>Connect domain to <code>zoho.com/mail</code> — free up to 5 users. Client gets <code>hello@theirbusiness.com</code> for free.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-line"><div class="step-dot">8</div><div class="step-connector"></div></div>
+          <div class="step-content">
+            <h4>Handover + Training</h4>
+            <p>Record a 15-min Loom video showing client how to edit text, upload images, add blog posts. Share login credentials. They never need to call you for small stuff.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COSTS -->
+    <div class="section">
+      <div class="section-title"><span class="num">02</span> Complete Cost Breakdown</div>
+      <table>
+        <tr>
+          <th>Item</th>
+          <th>Cost</th>
+          <th>Who Pays</th>
+          <th>Frequency</th>
+        </tr>
+        <tr>
+          <td>Domain (.com)</td>
+          <td>~$10 / ₹850</td>
+          <td><span class="cost cost-client">Client</span></td>
+          <td>Per Year</td>
+        </tr>
+        <tr>
+          <td>Hostinger Business</td>
+          <td>~₹5000</td>
+          <td><span class="cost cost-client">Client</span></td>
+          <td>Per Year</td>
+        </tr>
+        <tr>
+          <td>SSL Certificate</td>
+          <td>Free</td>
+          <td><span class="cost cost-free">Included</span></td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>Business Email (Zoho)</td>
+          <td>Free</td>
+          <td><span class="cost cost-free">Free</span></td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>Elementor Pro</td>
+          <td>$59 / ₹4900</td>
+          <td><span class="cost cost-paid">You (pass on)</span></td>
+          <td>Per Year</td>
+        </tr>
+        <tr>
+          <td>WPForms (contact form)</td>
+          <td>$49 / ₹4000</td>
+          <td><span class="cost cost-paid">You (pass on)</span></td>
+          <td>Per Year</td>
+        </tr>
+        <tr>
+          <td>Rank Math SEO (free tier)</td>
+          <td>Free</td>
+          <td><span class="cost cost-free">Free</span></td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>Your Dev Fee</td>
+          <td>₹15k–50k</td>
+          <td><span class="cost cost-client">Client</span></td>
+          <td>One Time</td>
+        </tr>
+        <tr>
+          <td>Monthly Maintenance</td>
+          <td>₹2k–5k/mo</td>
+          <td><span class="cost cost-client">Client</span></td>
+          <td>Monthly</td>
+        </tr>
+      </table>
+      <div class="highlight-box">
+        💡 Total client running cost ≈ ₹6000–7000/year for domain + hosting. Rest is one-time. Maintenance is optional recurring income for you.
+      </div>
+    </div>
+
+    <!-- WHAT CLIENT CAN DO THEMSELVES -->
+    <div class="section">
+      <div class="section-title"><span class="num">03</span> What Client Can Do Themselves (No Dev Needed)</div>
+      <div class="flow">
+        <div class="flow-box">Edit any text</div><div class="flow-arrow">→</div>
+        <div class="flow-box">Change images</div><div class="flow-arrow">→</div>
+        <div class="flow-box">Add blog posts</div><div class="flow-arrow">→</div>
+        <div class="flow-box">Update prices</div><div class="flow-arrow">→</div>
+        <div class="flow-box">Add new pages</div>
+      </div>
+      <p style="color:var(--muted);font-size:13px;margin-top:16px;">WordPress admin panel is <strong style="color:var(--text)">beginner friendly</strong>. If they can use Facebook, they can use WordPress.</p>
+    </div>
+
+    <!-- PROS CONS -->
+    <div class="section">
+      <div class="section-title"><span class="num">04</span> Pros & Cons</div>
+      <div class="pro-con">
+        <div class="pros">
+          <h5>✅ Pros</h5>
+          <ul>
+            <li>Very fast to build (1–3 days)</li>
+            <li>Client fully independent</li>
+            <li>Thousands of plugins for anything</li>
+            <li>Industry standard — support everywhere</li>
+            <li>Easy maintenance income</li>
+            <li>Clients trust WordPress brand</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h5>⚠️ Cons</h5>
+          <ul>
+            <li>Plugin updates needed monthly</li>
+            <li>Can get hacked if neglected</li>
+            <li>Not as fast as custom code</li>
+            <li>Elementor can make messy code</li>
+            <li>Hosting cost every year</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- BEST FOR -->
+    <div class="section">
+      <div class="section-title"><span class="num">05</span> Best For These Clients</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;">
+        <span class="pill">Restaurant / Cafe</span>
+        <span class="pill">Local Shop</span>
+        <span class="pill">Doctor / Clinic</span>
+        <span class="pill">Lawyer / CA</span>
+        <span class="pill">Real Estate</span>
+        <span class="pill">NGO / School</span>
+        <span class="pill">Small Business</span>
+        <span class="pill">Portfolio</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===================== PLAN B ===================== -->
+  <div class="plan plan-b" id="plan-b">
+
+    <div class="plan-header">
+      <div class="plan-label">Plan B — Modern Custom</div>
+      <h2>Next.js + Appwrite + Vercel</h2>
+      <p>You build a custom admin panel. Client logs in, edits content. Changes reflect on site in ~1 min. Hosted free on Vercel. Zero monthly cost.</p>
+      <div class="stack-pills">
+        <span class="pill">Next.js 14</span>
+        <span class="pill">Appwrite Cloud</span>
+        <span class="pill">Vercel (Free)</span>
+        <span class="pill">Namecheap Domain</span>
+        <span class="pill">Tailwind CSS</span>
+      </div>
+    </div>
+
+    <!-- HOW IT WORKS -->
+    <div class="section">
+      <div class="section-title"><span class="num">01</span> How the Whole System Works</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-line"><div class="step-dot">→</div><div class="step-connector"></div></div>
+          <div class="step-content">
+            <h4>Client Opens Admin Panel</h4>
+            <p>You give them a URL like <code>yourdomain.com/admin</code>. They log in with email + password (handled by Appwrite Auth — you don't build login from scratch).</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-line"><div class="step-dot">→</div><div class="step-connector"></div></div>
+          <div class="step-content">
+            <h4>Client Edits Content</h4>
+            <p>They see a simple dashboard — Edit About Us, Update Menu, Change Phone Number, Upload New Photo. You decide exactly what they can touch. Nothing else is visible.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-line"><div class="step-dot">→</div><div class="step-connector"></div></div>
+          <div class="step-content">
+            <h4>Data Saves to Appwrite</h4>
+            <p>All content (text, images, data) is stored in <code>Appwrite Database + Storage</code> on Appwrite Cloud. Free up to 75k reads/writes per day.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-line"><div class="step-dot">→</div><div class="step-connector"></div></div>
+          <div class="step-content">
+            <h4>Next.js Fetches + Rebuilds</h4>
+            <p>Your Next.js frontend uses <code>ISR (Incremental Static Regeneration)</code> — it checks for new content every 60 seconds and rebuilds pages automatically. No manual deploy needed.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-line"><div class="step-dot">→</div><div class="step-connector"></div></div>
+          <div class="step-content">
+            <h4>Visitor Sees Updated Site</h4>
+            <p>Within 30 seconds to 2 minutes, any visitor will see the updated content. Completely automatic. Client never calls you for content changes. ✅</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETUP STEPS -->
+    <div class="section">
+      <div class="section-title"><span class="num">02</span> Real Setup Steps (Dev Side)</div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-line"><div class="step-dot">1</div><div class="step-connector"></div></div>
+          <div class="step-content">
+            <h4>Create Appwrite Cloud Account</h4>
+            <p>Go to <code>cloud.appwrite.io</code> → Create free account → Create a new project. Note your Project ID and API key.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-line"><div class="step-dot">2</div><div class="step-connector"></div></div>
+          <div class="step-content">
+            <h4>Setup Database Collections</h4>
+            <p>In Appwrite → Databases → Create collections for each content type. Example: <code>homepage</code>, <code>services</code>, <code>gallery</code>, <code>contact_info</code>. Add attributes (fields) for each.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-line"><div class="step-dot">3</div><div class="step-connector"></div></div>
+          <div class="step-content">
+            <h4>Setup Auth for Admin</h4>
+            <p>In Appwrite → Auth → Create one user (the client). That's it. Appwrite handles login, sessions, tokens. You just call <code>account.createEmailSession()</code> in your code.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-line"><div class="step-dot">4</div><div class="step-connector"></div></div>
+          <div class="step-content">
+            <h4>Build Next.js App</h4>
+            <p>Run <code>npx create-next-app@latest</code>. Install Appwrite SDK: <code>npm install appwrite</code>. Build two parts — public website pages + protected <code>/admin</code> routes.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-line"><div class="step-dot">5</div><div class="step-connector"></div></div>
+          <div class="step-content">
+            <h4>Connect Frontend to Appwrite</h4>
+            <p>In your Next.js pages, use <code>databases.getDocument()</code> to fetch content. Use <code>revalidate: 60</code> in your fetch for ISR. Data auto refreshes every 60 seconds.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-line"><div class="step-dot">6</div><div class="step-connector"></div></div>
+          <div class="step-content">
+            <h4>Build Admin Panel UI</h4>
+            <p>Simple forms in <code>/admin</code> page. Login form → on submit calls Appwrite auth. Edit forms → on save calls <code>databases.updateDocument()</code>. Use Tailwind for styling. Keep it simple.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-line"><div class="step-dot">7</div><div class="step-connector"></div></div>
+          <div class="step-content">
+            <h4>Deploy to Vercel</h4>
+            <p>Push code to GitHub. Go to <code>vercel.com</code> → Import repo → Add environment variables (Appwrite keys). Click Deploy. Done. Free forever for this scale.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-line"><div class="step-dot">8</div><div class="step-connector"></div></div>
+          <div class="step-content">
+            <h4>Connect Custom Domain</h4>
+            <p>In Vercel project settings → Domains → Add <code>yourdomain.com</code>. Point Namecheap DNS to Vercel's nameservers. SSL auto-activates. Done.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COSTS -->
+    <div class="section">
+      <div class="section-title"><span class="num">03</span> Complete Cost Breakdown</div>
+      <table>
+        <tr>
+          <th>Item</th>
+          <th>Cost</th>
+          <th>Who Pays</th>
+          <th>Frequency</th>
+        </tr>
+        <tr>
+          <td>Domain (.com)</td>
+          <td>~$10 / ₹850</td>
+          <td><span class="cost cost-client">Client</span></td>
+          <td>Per Year</td>
+        </tr>
+        <tr>
+          <td>Vercel Hosting</td>
+          <td>Free</td>
+          <td><span class="cost cost-free">Free</span></td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>Appwrite Cloud</td>
+          <td>Free</td>
+          <td><span class="cost cost-free">Free</span></td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>SSL Certificate</td>
+          <td>Free</td>
+          <td><span class="cost cost-free">Vercel</span></td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>Business Email (Zoho)</td>
+          <td>Free</td>
+          <td><span class="cost cost-free">Free</span></td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td>Your Dev Fee</td>
+          <td>₹25k–70k</td>
+          <td><span class="cost cost-client">Client</span></td>
+          <td>One Time</td>
+        </tr>
+        <tr>
+          <td>Monthly Maintenance</td>
+          <td>₹1k–3k/mo</td>
+          <td><span class="cost cost-client">Client (optional)</span></td>
+          <td>Monthly</td>
+        </tr>
+      </table>
+      <div class="highlight-box">
+        💡 Client's ONLY running cost = domain (~₹850/year). Hosting is completely free. You can charge higher dev fee because of the custom admin system.
+      </div>
+    </div>
+
+    <!-- WHAT CLIENT CAN DO -->
+    <div class="section">
+      <div class="section-title"><span class="num">04</span> What Client Does via Admin Panel</div>
+      <div class="flow">
+        <div class="flow-box">Login at /admin</div><div class="flow-arrow">→</div>
+        <div class="flow-box">Edit text fields</div><div class="flow-arrow">→</div>
+        <div class="flow-box">Upload images</div><div class="flow-arrow">→</div>
+        <div class="flow-box">Save changes</div><div class="flow-arrow">→</div>
+        <div class="flow-box">Live in ~1 min ✅</div>
+      </div>
+      <p style="color:var(--muted);font-size:13px;margin-top:16px;">You control exactly what fields appear. Client cannot break the design. They only see inputs you build for them.</p>
+    </div>
+
+    <!-- PROS CONS -->
+    <div class="section">
+      <div class="section-title"><span class="num">05</span> Pros & Cons</div>
+      <div class="pro-con">
+        <div class="pros">
+          <h5>✅ Pros</h5>
+          <ul>
+            <li>Zero hosting cost for client</li>
+            <li>Blazing fast website</li>
+            <li>Custom admin — client can't break design</li>
+            <li>Very secure (no plugin vulnerabilities)</li>
+            <li>You look elite as a developer</li>
+            <li>Easy to add features anytime</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h5>⚠️ Cons</h5>
+          <ul>
+            <li>Takes longer to build (1–2 weeks)</li>
+            <li>You need React / Next.js knowledge</li>
+            <li>Updates take 30 sec–2 min (not instant)</li>
+            <li>If Appwrite free tier hits limits, upgrade needed</li>
+            <li>Less plug-and-play than WordPress</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- BEST FOR -->
+    <div class="section">
+      <div class="section-title"><span class="num">06</span> Best For These Clients</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;">
+        <span class="pill">Startups</span>
+        <span class="pill">Tech-savvy businesses</span>
+        <span class="pill">Portfolio / Personal brand</span>
+        <span class="pill">Agencies</span>
+        <span class="pill">Clients wanting speed</span>
+        <span class="pill">Budget-conscious clients</span>
+        <span class="pill">Your own projects</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FINAL VERDICT -->
+  <div class="verdict">
+    <h3>Which Plan Should You Pick?</h3>
+    <p>Both are real, professional, production-ready. Choose based on your skills and client type.</p>
+    <div class="verdict-grid">
+      <div class="verdict-card verdict-a">
+        <div class="v-label">Plan A</div>
+        <h4>WordPress + Hostinger</h4>
+        <p>Pick this when you want to deliver fast, client is non-technical, and you want maintenance income every month.</p>
+      </div>
+      <div class="verdict-card verdict-b">
+        <div class="v-label">Plan B</div>
+        <h4>Next.js + Appwrite + Vercel</h4>
+        <p>Pick this when you want to stand out, charge more, and offer a premium zero-hosting-cost solution.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const btns = document.querySelectorAll('.tab-btn');
+  function showPlan(plan) {
+    document.querySelectorAll('.plan').forEach(p => p.classList.remove('active'));
+    document.getElementById('plan-' + plan).classList.add('active');
+    btns.forEach(b => b.classList.remove('active-a', 'active-b'));
+    btns[plan === 'a' ? 0 : 1].classList.add(plan === 'a' ? 'active-a' : 'active-b');
+  }
+</script>
+
+</body>
+</html>
