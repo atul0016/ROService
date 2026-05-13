@@ -105,7 +105,7 @@ export default async function HomePage() {
           <div className="products-gallery">
             {content.products.map((product) => (
               <article className="product-tile" key={product.title}>
-                <img src={`/${product.image}`} alt={product.title} />
+                <img src={product.image && product.image.startsWith('http') ? product.image : `/${product.image}`} alt={product.title} />
                 <h3>{product.title}</h3>
                 <p>{product.description}</p>
                 <a className="wa-inline" href={whatsappLink(business.primaryPhoneIntl, `Hello ${business.name}. I need details for ${product.title}. Please contact me.`)} target="_blank" rel="noopener noreferrer">Ask on WhatsApp</a>

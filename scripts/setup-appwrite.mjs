@@ -6,6 +6,7 @@ const apiKey = process.env.APPWRITE_API_KEY;
 const databaseId = process.env.APPWRITE_DATABASE_ID || "smart_ro_cms";
 const collectionId = process.env.APPWRITE_SITE_CONTENT_COLLECTION_ID || "site_content";
 const documentId = process.env.APPWRITE_SITE_CONTENT_DOCUMENT_ID || "smart-ro";
+const bucketId = process.env.NEXT_PUBLIC_APPWRITE_BUCKET_ID || "smart_ro_images";
 const adminEmail = process.env.APPWRITE_ADMIN_EMAIL;
 const adminPassword = process.env.APPWRITE_ADMIN_PASSWORD;
 
@@ -63,6 +64,22 @@ async function ensureCollection() {
   console.log(result.status === 409 ? "Collection already exists." : "Collection created.");
 }
 
+async function ensureBucket() {
+  const result = await request("/storage/buckets", {
+    method: "POST",
+    body: JSON.stringify({
+      bucketId,
+      name: "Website Images",
+      fileSecurity: false,
+      permissions: ['read("any")', 'create("users")', 'update("users")', 'delete("users")']
+    })
+  }).catch(e => {
+    if (e.message && (e.message.includes('409') || e.message.includes('403'))) return { status: 409 };
+    throw e;
+  });
+  console.log(result.status === 409 ? "Storage Bucket already exists." : "Storage Bucket created.");
+}
+
 async function ensureContentAttribute() {
   const result = await request(`/databases/${databaseId}/collections/${collectionId}/attributes/string`, {
     method: "POST",
@@ -89,25 +106,29 @@ async function waitForAttribute() {
 
 async function ensureDocument() {
   const data = { content: JSON.stringify(fallbackContent, null, 2) };
+  
+  // Actually enforce smart-ro as the document ID that Next expects
+  const targetDocId = documentId || "smart-ro";
+  
   const create = await request(`/databases/${databaseId}/collections/${collectionId}/documents`, {
     method: "POST",
     body: JSON.stringify({
-      documentId,
+      documentId: targetDocId,
       data,
       permissions: ['read("any")', 'update("users")', 'delete("users")']
     })
   });
 
   if (create.status !== 409) {
-    console.log("Seed document created.");
+    console.log(`Seed document ${targetDocId} created.`);
     return;
   }
 
-  await request(`/databases/${databaseId}/collections/${collectionId}/documents/${documentId}`, {
+  await request(`/databases/${databaseId}/collections/${collectionId}/documents/${targetDocId}`, {
     method: "PATCH",
     body: JSON.stringify({ data })
   });
-  console.log("Seed document already existed; content refreshed.");
+  console.log(`Seed document ${targetDocId} already existed; content refreshed.`);
 }
 
 async function ensureAdminUser() {
@@ -133,6 +154,7 @@ async function ensureAdminUser() {
 
 await ensureDatabase();
 await ensureCollection();
+await ensureBucket();
 await ensureContentAttribute();
 await waitForAttribute();
 await ensureDocument();
@@ -145,6 +167,7 @@ console.log(`NEXT_PUBLIC_APPWRITE_PROJECT_ID=${projectId}`);
 console.log(`NEXT_PUBLIC_APPWRITE_DATABASE_ID=${databaseId}`);
 console.log(`NEXT_PUBLIC_APPWRITE_SITE_CONTENT_COLLECTION_ID=${collectionId}`);
 console.log(`NEXT_PUBLIC_APPWRITE_SITE_CONTENT_DOCUMENT_ID=${documentId}`);
+console.log(`NEXT_PUBLIC_APPWRITE_BUCKET_ID=${bucketId}`);
 console.log(`APPWRITE_DATABASE_ID=${databaseId}`);
 console.log(`APPWRITE_SITE_CONTENT_COLLECTION_ID=${collectionId}`);
 console.log(`APPWRITE_SITE_CONTENT_DOCUMENT_ID=${documentId}`);
